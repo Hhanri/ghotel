@@ -28,8 +28,13 @@ func NewMongoUserStore(c *mongo.Client) *MongoUserStore {
 }
 
 func (s *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.User, error) {
+	oid, err := ToObjectID(id)
+	if err != nil {
+		return nil, err
+	}
+
 	var user types.User
-	err := s.coll.FindOne(ctx, bson.M{"_id": ToObjectID(id)}).Decode(&user)
+	err = s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&user)
 	if err != nil {
 		return nil, err
 	}
