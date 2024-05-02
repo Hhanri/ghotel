@@ -44,8 +44,8 @@ func main() {
 	// handlers initialization
 	userHandler := api.NewUserHandler(userStore)
 
-	apiV1.Get("/user", userHandler.HandleGetUser)
-	apiV1.Get("/user/:id", userHandler.HandleGetUsers)
+	apiV1.Get("/user", userHandler.HandleGetUsers)
+	apiV1.Get("/user/:id", userHandler.HandleGetUser)
 
 	app.Listen(*listenAddr)
 
