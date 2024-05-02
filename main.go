@@ -7,11 +7,19 @@ import (
 	"github.com/hhanri/ghotel/api"
 )
 
+var config = fiber.Config{
+	ErrorHandler: func(c *fiber.Ctx, err error) error {
+		return c.JSON(
+			map[string]string{"error": err.Error()},
+		)
+	},
+}
+
 func main() {
 	listenAddr := flag.String("listenAddr", "localhost:5000", "Listen address of the api server")
 	flag.Parse()
 
-	app := fiber.New()
+	app := fiber.New(config)
 
 	apiV1 := app.Group("/api/v1")
 
