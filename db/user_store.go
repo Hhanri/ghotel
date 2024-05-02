@@ -51,8 +51,8 @@ func (s *MongoUserStore) GetUsers(ctx context.Context) ([]*types.User, error) {
 	}
 
 	var users []*types.User
-	if err := cursor.Decode(&users); err != nil {
-		return []*types.User{}, nil
+	if err := cursor.All(ctx, &users); err != nil {
+		return nil, err
 	}
 
 	return users, nil
