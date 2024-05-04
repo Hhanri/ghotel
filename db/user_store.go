@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/hhanri/ghotel/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,6 +17,7 @@ type UserStore interface {
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
+	DeleteUser(context.Context, string) error
 }
 
 type MongoUserStore struct {
@@ -38,9 +41,16 @@ func (s *MongoUserStore) GetUserByID(ctx context.Context, id string) (*types.Use
 
 	var user types.User
 	err = s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&user)
+
 	if err != nil {
+
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("not found")
+		}
+
 		return nil, err
 	}
+
 	return &user, nil
 }
 
