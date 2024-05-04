@@ -67,3 +67,17 @@ func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*typ
 	user.ID = res.InsertedID.(primitive.ObjectID).Hex()
 	return user, nil
 }
+
+func (s *MongoUserStore) DeleteUser(ctx context.Context, id string) error {
+	oid, err := ToObjectID(id)
+	if err != nil {
+		return err
+	}
+
+	// TODO: maybe handle if we didn't delete any user
+	_, err = s.coll.DeleteOne(
+		ctx,
+		bson.M{"_id": oid},
+	)
+	return err
+}
