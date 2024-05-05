@@ -39,7 +39,7 @@ func main() {
 	}
 
 	// stores initialization
-	userStore := db.NewMongoUserStore(client)
+	userStore := db.NewMongoUserStore(client, db.DBNAME)
 
 	// handlers initialization
 	userHandler := api.NewUserHandler(userStore)
