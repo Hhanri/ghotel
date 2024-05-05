@@ -5,4 +5,4 @@ run: build
 	@./bin/ghotel
 
 test:
-	@go test ./... -v
+	@go test ./... -v -count=1
