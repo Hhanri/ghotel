@@ -64,6 +64,22 @@ func (h *UserHandler) seedUser(app *fiber.App, params *types.CreateUserParams) t
 	return user
 }
 
+func (h *UserHandler) getUser(app *fiber.App, id string) types.User {
+	app.Get("/:id", h.HandleGetUser)
+	user := testRequest[types.User](
+		app,
+		"GET",
+		"/"+id,
+		nil,
+		func(r io.ReadCloser) types.User {
+			var user types.User
+			json.NewDecoder(r).Decode(&user)
+			return user
+		},
+	)
+	return user
+}
+
 func testRequest[T any](app *fiber.App, method string, path string, body io.Reader, transform func(io.ReadCloser) T) T {
 	request := httptest.NewRequest(method, path, body)
 	request.Header.Add("Content-Type", "application/json")
@@ -171,4 +187,50 @@ func TestGetUsers(t *testing.T) {
 	if users[0] != dbUser1 && users[1] != dbUser2 {
 		t.Errorf("expected %+v but got %+v", []types.User{dbUser1, dbUser2}, users)
 	}
+}
+
+func TestUpdateUser(t *testing.T) {
+	testDB := setup(t)
+	defer testDB.teardown(t)
+
+	userHandler := NewUserHandler(testDB)
+
+	app := newApp()
+	app.Put("/:id", userHandler.HandleUpdateUser)
+
+	dbUser := userHandler.seedUser(app, &userParams)
+
+	update := types.UpdateUserParams{
+		FirstName: "FooFoo",
+		LastName:  "BarBar",
+	}
+	b, _ := json.Marshal(update)
+
+	id := testRequest[string](
+		app,
+		"PUT",
+		"/"+dbUser.ID,
+		bytes.NewReader(b),
+		func(r io.ReadCloser) string {
+			b, _ := io.ReadAll(r)
+			m := make(map[string]string)
+			_ = json.Unmarshal(b, &m)
+			return m["data"]
+		},
+	)
+
+	if id != dbUser.ID {
+		t.Errorf("Expected ID %s but got %s", dbUser.ID, id)
+	}
+
+	updatedUser := userHandler.getUser(app, id)
+
+	if updatedUser.FirstName != update.FirstName {
+		t.Errorf("expected first name (%s) but got %s", update.FirstName, updatedUser.FirstName)
+	}
+
+	if updatedUser.LastName != update.LastName {
+		t.Errorf("expected last name (%s) but got %s", update.FirstName, updatedUser.FirstName)
+	}
+
 }
