@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 	"net/http/httptest"
 	"testing"
@@ -49,6 +50,18 @@ func setup(t *testing.T) *testDB {
 
 func newApp() *fiber.App {
 	return fiber.New()
+}
+
+func (h *UserHandler) seedUser(app *fiber.App, params *types.CreateUserParams) types.User {
+	app.Post("/", h.HandlePostUser)
+	b, _ := json.Marshal(params)
+	request := httptest.NewRequest("POST", "/", bytes.NewReader(b))
+	request.Header.Add("Content-Type", "application/json")
+	resp, _ := app.Test(request)
+
+	var user types.User
+	json.NewDecoder(resp.Body).Decode(&user)
+	return user
 }
 
 func testRequest[T any](app *fiber.App, method string, path string, body io.Reader, transform func(io.ReadCloser) T) T {
@@ -100,5 +113,33 @@ func TestPostUser(t *testing.T) {
 
 	if user.EncryptedPassword != "" {
 		t.Errorf("expected password not to be returned")
+	}
+}
+
+func TestGetUserByID(t *testing.T) {
+	testDB := setup(t)
+	defer testDB.teardown(t)
+
+	userHandler := NewUserHandler(testDB)
+
+	app := newApp()
+	app.Get("/:id", userHandler.HandleGetUser)
+
+	dbUser := userHandler.seedUser(app, &userParams)
+
+	user := testRequest[types.User](
+		app,
+		"GET",
+		"/"+dbUser.ID,
+		nil,
+		func(r io.ReadCloser) types.User {
+			var user types.User
+			json.NewDecoder(r).Decode(&user)
+			return user
+		},
+	)
+
+	if user != dbUser {
+		t.Errorf("Got %+v instead of %+v", user, dbUser)
 	}
 }
