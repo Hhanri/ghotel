@@ -143,3 +143,32 @@ func TestGetUserByID(t *testing.T) {
 		t.Errorf("Got %+v instead of %+v", user, dbUser)
 	}
 }
+
+func TestGetUsers(t *testing.T) {
+	testDB := setup(t)
+	defer testDB.teardown(t)
+
+	userHandler := NewUserHandler(testDB)
+
+	app := newApp()
+	app.Get("/", userHandler.HandleGetUsers)
+
+	dbUser1 := userHandler.seedUser(app, &userParams)
+	dbUser2 := userHandler.seedUser(app, &userParams)
+
+	users := testRequest[[]types.User](
+		app,
+		"GET",
+		"/",
+		nil,
+		func(r io.ReadCloser) []types.User {
+			var users []types.User
+			json.NewDecoder(r).Decode(&users)
+			return users
+		},
+	)
+
+	if users[0] != dbUser1 && users[1] != dbUser2 {
+		t.Errorf("expected %+v but got %+v", []types.User{dbUser1, dbUser2}, users)
+	}
+}
