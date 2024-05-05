@@ -14,6 +14,8 @@ import (
 const usersColl = "users"
 
 type UserStore interface {
+	Dropper
+
 	GetUserByID(context.Context, string) (*types.User, error)
 	GetUsers(context.Context) ([]*types.User, error)
 	InsertUser(context.Context, *types.User) (*types.User, error)
@@ -105,4 +107,9 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, id string, params types
 
 	_, err = s.coll.UpdateByID(ctx, oid, update)
 	return err
+}
+
+func (s *MongoUserStore) Drop(ctx context.Context) error {
+	fmt.Println("--- dropping user collection ---")
+	return s.coll.Drop(ctx)
 }
