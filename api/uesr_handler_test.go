@@ -232,5 +232,39 @@ func TestUpdateUser(t *testing.T) {
 	if updatedUser.LastName != update.LastName {
 		t.Errorf("expected last name (%s) but got %s", update.FirstName, updatedUser.FirstName)
 	}
+}
 
+func TestDeleteUser(t *testing.T) {
+	testDB := setup(t)
+	defer testDB.teardown(t)
+
+	userHandler := NewUserHandler(testDB)
+
+	app := newApp()
+	app.Delete("/:id", userHandler.HandleDeleteUser)
+
+	dbUser := userHandler.seedUser(app, &userParams)
+
+	id := testRequest[string](
+		app,
+		"DELETE",
+		"/"+dbUser.ID,
+		nil,
+		func(r io.ReadCloser) string {
+			b, _ := io.ReadAll(r)
+			m := make(map[string]string)
+			_ = json.Unmarshal(b, &m)
+			return m["data"]
+		},
+	)
+
+	if id != dbUser.ID {
+		t.Errorf("Expected ID %s but got %s", dbUser.ID, id)
+	}
+
+	deletedUser := userHandler.getUser(app, id)
+
+	if deletedUser != (types.User{}) {
+		t.Errorf("expected empty user but got %+v", deletedUser)
+	}
 }
