@@ -7,6 +7,7 @@ import (
 )
 
 const DBNAME = "ghotel"
+const TestDBNAME = "ghotel-test"
 
 func ToObjectID(id string) (primitive.ObjectID, error) {
 	return primitive.ObjectIDFromHex(id)
