@@ -12,8 +12,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-const dbUri string = "mongodb://localhost:27017"
-
 var config = fiber.Config{
 	ErrorHandler: func(c *fiber.Ctx, err error) error {
 		return c.JSON(
@@ -23,7 +21,9 @@ var config = fiber.Config{
 }
 
 func main() {
-	listenAddr := flag.String("listenAddr", "localhost:5000", "Listen address of the api server")
+
+	dbUri := flag.String("dbUri", "mongodb://localhost:27017", "DB Uri")
+	listenAddr := flag.String("listenAddr", ":9090", "Listen address of the api server")
 	flag.Parse()
 
 	app := fiber.New(config)
@@ -32,7 +32,7 @@ func main() {
 
 	client, err := mongo.Connect(
 		context.TODO(),
-		options.Client().ApplyURI(dbUri),
+		options.Client().ApplyURI(*dbUri),
 	)
 	if err != nil {
 		log.Fatal(err)

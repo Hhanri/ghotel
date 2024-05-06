@@ -1,0 +1,56 @@
+version: '3.9'
+services:
+
+  ghotel-api:
+    container_name: ghotel-api
+    image: ghotel-api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 9090:9090
+    networks:
+      - backend-network
+    depends_on:
+      - db
+    volumes:
+      - ghotel-api:/app
+
+  db:
+    image: mongo
+    container_name: ghotel-mongo
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=ghotel
+      - MONGO_INITDB_ROOT_PASSWORD=secret
+    networks:
+      - backend-network
+    volumes:
+      - ghotel-api:/data/db
+      - ghotel-api:/data/configdb
+
+  db-client:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=ghotel
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=secret
+      - ME_CONFIG_MONGODB_URL=mongodb://ghotel:secret@db:27017/
+    depends_on:
+      - db
+    networks:
+      - backend-network
+    volumes:
+      - ghotel-api:/data/mongo-express
+  
+  
+
+networks:
+  backend-network:
+
+volumes:
+  ghotel-api:
