@@ -43,3 +43,7 @@ func (s *MongoRoomStore) Insert(ctx context.Context, room *types.Room) (*types.R
 
 	return room, nil
 }
+
+func (s *MongoRoomStore) Drop(ctx context.Context) error {
+	return s.coll.Drop(ctx)
+}

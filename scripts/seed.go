@@ -23,6 +23,14 @@ func main() {
 	hotelStore := db.NewMongoHotelStore(client, db.TestDBNAME)
 	roomStore := db.NewMongoRoomStore(client, db.TestDBNAME, hotelStore)
 
+	if err := roomStore.Drop(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+
+	if err := hotelStore.Drop(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+
 	hotel := &types.Hotel{
 		Name:     "Belluga",
 		Location: "France",

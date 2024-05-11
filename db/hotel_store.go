@@ -11,6 +11,8 @@ import (
 const hotelsColl = "hotels"
 
 type HotelStore interface {
+	Dropper
+
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	AddRoom(context.Context, *types.Room) error
 }
@@ -52,4 +54,8 @@ func (s *MongoHotelStore) AddRoom(ctx context.Context, room *types.Room) error {
 
 	_, err = s.coll.UpdateByID(ctx, hotelID, update)
 	return err
+}
+
+func (s *MongoHotelStore) Drop(ctx context.Context) error {
+	return s.coll.Drop(ctx)
 }
