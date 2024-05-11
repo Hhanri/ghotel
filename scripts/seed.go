@@ -31,29 +31,28 @@ func main() {
 		log.Fatal(err)
 	}
 
-	hotel := &types.Hotel{
-		Name:     "Belluga",
-		Location: "France",
-		Rooms:    []string{},
-	}
-
-	roomA := &types.Room{
-		Type:      types.SinglePersonRoomType,
-		BasePrice: 99.99,
-	}
-	roomB := &types.Room{
-		Type:      types.DeluxeRoomType,
-		BasePrice: 179.99,
-	}
-
-	insertHotelAndRooms(
+	seedHotel(
 		hotelStore,
 		roomStore,
-		hotel,
-		[]*types.Room{
-			roomA,
-			roomB,
-		},
+		"Belluga",
+		"France",
+		0,
+	)
+
+	seedHotel(
+		hotelStore,
+		roomStore,
+		"Bellutwo",
+		"France",
+		5,
+	)
+
+	seedHotel(
+		hotelStore,
+		roomStore,
+		"Cheese",
+		"United Kingdom",
+		3,
 	)
 
 }
@@ -81,4 +80,37 @@ func insertHotelAndRooms(
 	}
 
 	return nil
+}
+
+func seedHotel(
+	hotelStore db.HotelStore,
+	roomStore db.RoomStore,
+	name string,
+	location string,
+	rating int,
+) error {
+	hotel := &types.Hotel{
+		Name:     name,
+		Location: location,
+		Rooms:    []string{},
+		Rating:   rating,
+	}
+	roomA := &types.Room{
+		Type:      types.SinglePersonRoomType,
+		BasePrice: 99.99,
+	}
+	roomB := &types.Room{
+		Type:      types.DeluxeRoomType,
+		BasePrice: 179.99,
+	}
+
+	return insertHotelAndRooms(
+		hotelStore,
+		roomStore,
+		hotel,
+		[]*types.Room{
+			roomA,
+			roomB,
+		},
+	)
 }
