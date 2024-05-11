@@ -20,8 +20,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	hotelStore := db.NewMongoHotelStore(client, db.TestDBNAME)
-	roomStore := db.NewMongoRoomStore(client, db.TestDBNAME, hotelStore)
+	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
 
 	if err := roomStore.Drop(context.Background()); err != nil {
 		log.Fatal(err)
