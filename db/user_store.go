@@ -7,7 +7,6 @@ import (
 
 	"github.com/hhanri/ghotel/types"
 	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -77,7 +76,7 @@ func (s *MongoUserStore) InsertUser(ctx context.Context, user *types.User) (*typ
 		return nil, err
 	}
 
-	user.ID = res.InsertedID.(primitive.ObjectID).Hex()
+	user.ID = ObjectIdToString(res.InsertedID)
 	return user, nil
 }
 
