@@ -44,14 +44,9 @@ func (s *MongoHotelStore) AddRoom(ctx context.Context, room *types.Room) error {
 		return err
 	}
 
-	roomID, err := ToObjectID(room.ID)
-	if err != nil {
-		return err
-	}
-
 	update := bson.M{
 		"$push": bson.M{
-			"rooms": roomID,
+			"rooms": room.ID,
 		},
 	}
 
