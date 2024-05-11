@@ -15,6 +15,7 @@ type HotelStore interface {
 
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	AddRoom(context.Context, *types.Room) error
+	List(context.Context, interface{}) ([]*types.Hotel, error)
 }
 
 type MongoHotelStore struct {
@@ -58,4 +59,17 @@ func (s *MongoHotelStore) AddRoom(ctx context.Context, room *types.Room) error {
 
 func (s *MongoHotelStore) Drop(ctx context.Context) error {
 	return s.coll.Drop(ctx)
+}
+
+func (s *MongoHotelStore) List(ctx context.Context, filter interface{}) ([]*types.Hotel, error) {
+	res, err := s.coll.Find(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var hotels []*types.Hotel
+	if err := res.All(ctx, &hotels); err != nil {
+		return nil, err
+	}
+	return hotels, nil
 }
