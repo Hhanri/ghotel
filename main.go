@@ -1,15 +1,12 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/api"
 	"github.com/hhanri/ghotel/db"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var config = fiber.Config{
@@ -30,10 +27,7 @@ func main() {
 
 	apiV1 := app.Group("/api/v1")
 
-	client, err := mongo.Connect(
-		context.TODO(),
-		options.Client().ApplyURI(*dbUri),
-	)
+	client, err := db.NewMongoClient(*dbUri)
 	if err != nil {
 		log.Fatal(err)
 	}
