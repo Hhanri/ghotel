@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const DBNAME = "ghotel"
@@ -19,4 +21,11 @@ func ObjectIdToString(id interface{}) string {
 
 type Dropper interface {
 	Drop(context.Context) error
+}
+
+func NewMongoClient(dbUri string) (*mongo.Client, error) {
+	return mongo.Connect(
+		context.TODO(),
+		options.Client().ApplyURI(dbUri),
+	)
 }
