@@ -44,7 +44,7 @@ func main() {
 	}
 
 	// handlers initialization
-	userHandler := api.NewUserHandler(userStore)
+	userHandler := api.NewUserHandler(store)
 	hotelHandler := api.NewHotelHandler(store)
 
 	// user handlers

@@ -26,11 +26,11 @@ var userParams = types.CreateUserParams{
 }
 
 type testDB struct {
-	db.UserStore
+	db.Store
 }
 
 func (db *testDB) teardown(t *testing.T) {
-	if err := db.UserStore.Drop(context.Background()); err != nil {
+	if err := db.User.Drop(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -44,7 +44,9 @@ func setup(t *testing.T) *testDB {
 		log.Fatal(err)
 	}
 	return &testDB{
-		UserStore: db.NewMongoUserStore(client, db.TestDBNAME),
+		Store: db.Store{
+			User: db.NewMongoUserStore(client, db.TestDBNAME),
+		},
 	}
 }
 
