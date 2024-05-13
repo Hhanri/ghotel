@@ -37,9 +37,15 @@ func main() {
 	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
 	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
 
+	store := &db.Store{
+		User:  userStore,
+		Hotel: hotelStore,
+		Room:  roomStore,
+	}
+
 	// handlers initialization
 	userHandler := api.NewUserHandler(userStore)
-	hotelHandler := api.NewHotelHandler(hotelStore, roomStore)
+	hotelHandler := api.NewHotelHandler(store)
 
 	// user handlers
 	apiV1.Get("/user", userHandler.HandleGetUsers)
