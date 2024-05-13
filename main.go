@@ -1,15 +1,12 @@
 package main
 
 import (
-	"context"
 	"flag"
 	"log"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/api"
 	"github.com/hhanri/ghotel/db"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 var config = fiber.Config{
@@ -30,25 +27,30 @@ func main() {
 
 	apiV1 := app.Group("/api/v1")
 
-	client, err := mongo.Connect(
-		context.TODO(),
-		options.Client().ApplyURI(*dbUri),
-	)
+	client, err := db.NewMongoClient(*dbUri)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// stores initialization
 	userStore := db.NewMongoUserStore(client, db.DBNAME)
+	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
+	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
 
 	// handlers initialization
 	userHandler := api.NewUserHandler(userStore)
+	hotelHandler := api.NewHotelHandler(hotelStore, roomStore)
 
+	// user handlers
 	apiV1.Get("/user", userHandler.HandleGetUsers)
 	apiV1.Get("/user/:id", userHandler.HandleGetUser)
 	apiV1.Post("/user", userHandler.HandlePostUser)
 	apiV1.Delete("/user/:id", userHandler.HandleDeleteUser)
 	apiV1.Put("/user/:id", userHandler.HandleUpdateUser)
+
+	// hotel handlers
+	apiV1.Get("/hotel", hotelHandler.HandleGetHotels)
+	apiV1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
 
 	app.Listen(*listenAddr)
 
