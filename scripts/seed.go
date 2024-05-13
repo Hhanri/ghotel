@@ -96,12 +96,14 @@ func seedHotel(
 		Rating:   rating,
 	}
 	roomA := &types.Room{
-		Type:      types.SinglePersonRoomType,
-		BasePrice: 99.99,
+		Size:    "small",
+		Seaside: false,
+		Price:   99.99,
 	}
 	roomB := &types.Room{
-		Type:      types.DeluxeRoomType,
-		BasePrice: 179.99,
+		Size:    "king",
+		Seaside: true,
+		Price:   179.99,
 	}
 
 	return insertHotelAndRooms(

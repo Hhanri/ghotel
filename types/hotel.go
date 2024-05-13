@@ -8,20 +8,12 @@ type Hotel struct {
 	Rating   int      `bson:"rating" json:"rating"`
 }
 
-type RoomType int
-
-const (
-	_ RoomType = iota
-	SinglePersonRoomType
-	DoubleRoomType
-	SeeSideRoomType
-	DeluxeRoomType
-)
-
 type Room struct {
-	ID        string   `bson:"_id,omitempty" json:"id,omitempty"`
-	Type      RoomType `bson:"type" json:"type"`
-	BasePrice float64  `bson:"basePrice" json:"basePrice"`
-	Price     float64  `bson:"price" json:"price"`
-	HotelID   string   `bson:"hotelId" json:"hotelId"`
+	ID      string  `bson:"_id,omitempty" json:"id,omitempty"`
+	Price   float64 `bson:"price" json:"price"`
+	HotelID string  `bson:"hotelId" json:"hotelId"`
+
+	// small, normal, king
+	Size    string `bson:"size" json:"size"`
+	Seaside bool   `bson:"seaside" json:"seaside"`
 }
