@@ -26,11 +26,11 @@ var userParams = types.CreateUserParams{
 }
 
 type testDB struct {
-	db.UserStore
+	*db.Store
 }
 
 func (db *testDB) teardown(t *testing.T) {
-	if err := db.UserStore.Drop(context.Background()); err != nil {
+	if err := db.User.Drop(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -44,7 +44,9 @@ func setup(t *testing.T) *testDB {
 		log.Fatal(err)
 	}
 	return &testDB{
-		UserStore: db.NewMongoUserStore(client, db.TestDBNAME),
+		Store: &db.Store{
+			User: db.NewMongoUserStore(client, db.TestDBNAME),
+		},
 	}
 }
 
@@ -91,7 +93,7 @@ func TestPostUser(t *testing.T) {
 	testDB := setup(t)
 	defer testDB.teardown(t)
 
-	userHandler := NewUserHandler(testDB)
+	userHandler := NewUserHandler(testDB.Store)
 
 	app := newApp()
 	app.Post("/", userHandler.HandlePostUser)
@@ -136,7 +138,7 @@ func TestGetUserByID(t *testing.T) {
 	testDB := setup(t)
 	defer testDB.teardown(t)
 
-	userHandler := NewUserHandler(testDB)
+	userHandler := NewUserHandler(testDB.Store)
 
 	app := newApp()
 	app.Get("/:id", userHandler.HandleGetUser)
@@ -164,7 +166,7 @@ func TestGetUsers(t *testing.T) {
 	testDB := setup(t)
 	defer testDB.teardown(t)
 
-	userHandler := NewUserHandler(testDB)
+	userHandler := NewUserHandler(testDB.Store)
 
 	app := newApp()
 	app.Get("/", userHandler.HandleGetUsers)
@@ -193,7 +195,7 @@ func TestUpdateUser(t *testing.T) {
 	testDB := setup(t)
 	defer testDB.teardown(t)
 
-	userHandler := NewUserHandler(testDB)
+	userHandler := NewUserHandler(testDB.Store)
 
 	app := newApp()
 	app.Put("/:id", userHandler.HandleUpdateUser)
@@ -238,7 +240,7 @@ func TestDeleteUser(t *testing.T) {
 	testDB := setup(t)
 	defer testDB.teardown(t)
 
-	userHandler := NewUserHandler(testDB)
+	userHandler := NewUserHandler(testDB.Store)
 
 	app := newApp()
 	app.Delete("/:id", userHandler.HandleDeleteUser)
