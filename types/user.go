@@ -66,6 +66,14 @@ func NewUserFromParams(params CreateUserParams) (*User, error) {
 
 }
 
+func (u *User) VerifyPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password))
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err == nil
+}
+
 type UpdateUserParams struct {
 	FirstName string `json:"firstName"`
 	LastName  string `json:"lastName"`
