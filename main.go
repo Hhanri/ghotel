@@ -6,6 +6,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/api"
+	"github.com/hhanri/ghotel/api/middleware"
 	"github.com/hhanri/ghotel/db"
 )
 
@@ -26,6 +27,7 @@ func main() {
 	app := fiber.New(config)
 
 	apiV1 := app.Group("/api/v1")
+	apiV1 := app.Group("/api/v1", middleware.JWTAuthentication)
 
 	client, err := db.NewMongoClient(*dbUri)
 	if err != nil {
