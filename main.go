@@ -26,7 +26,7 @@ func main() {
 
 	app := fiber.New(config)
 
-	apiV1 := app.Group("/api/v1")
+	apiRoot := app.Group("/api")
 	apiV1 := app.Group("/api/v1", middleware.JWTAuthentication)
 
 	client, err := db.NewMongoClient(*dbUri)
@@ -46,8 +46,12 @@ func main() {
 	}
 
 	// handlers initialization
+	authHandler := api.NewAuthHandler(store)
 	userHandler := api.NewUserHandler(store)
 	hotelHandler := api.NewHotelHandler(store)
+
+	// auth
+	apiRoot.Post("/auth", authHandler.HandleAuthenticate)
 
 	// user handlers
 	apiV1.Get("/user", userHandler.HandleGetUsers)
