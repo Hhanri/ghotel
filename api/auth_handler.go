@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/db"
+	"github.com/hhanri/ghotel/types"
 )
 
 type AuthHandler struct {
@@ -22,6 +23,11 @@ type AuthParams struct {
 	Password string `json:"password"`
 }
 
+type AuthResponse struct {
+	User  *types.User `json:"user"`
+	Token string      `json:"token"`
+}
+
 func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	var params AuthParams
 	if err := c.BodyParser(&params); err != nil {
@@ -37,7 +43,9 @@ func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 		return fmt.Errorf("invalid credentials")
 	}
 
-	fmt.Println("authenticated")
-
-	return c.JSON(user)
+	resp := AuthResponse{
+		User:  user,
+		Token: user.CreateJWT(),
+	}
+	return c.JSON(resp)
 }
