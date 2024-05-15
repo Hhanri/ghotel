@@ -1,10 +1,11 @@
 package api
 
 import (
-	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"log"
+	"net/http"
 	"net/http/httptest"
 	"testing"
 
@@ -46,7 +47,7 @@ func newApp() *fiber.App {
 	return fiber.New()
 }
 
-func defaultStatusHandler(status int, body string) {}
+func defaultStatusHandler(status int, err ErrorResponse) {}
 
 func testRequest[T any](
 	app *fiber.App,
@@ -54,24 +55,17 @@ func testRequest[T any](
 	path string,
 	body io.Reader,
 	transform func(io.ReadCloser) T,
-	handleStatus func(int, string),
+	handleStatus func(int, ErrorResponse),
 ) T {
 	request := httptest.NewRequest(method, path, body)
 	request.Header.Add("Content-Type", "application/json")
 	resp, _ := app.Test(request)
 
-	buff := bytes.Buffer{}
-	tee := io.TeeReader(resp.Body, &buff)
-	b, _ := io.ReadAll(tee)
-	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		var errorResp ErrorResponse
+		_ = json.NewDecoder(resp.Body).Decode(&errorResp)
+		handleStatus(resp.StatusCode, errorResp)
+	}
 
-	handleStatus(resp.StatusCode, string(b))
-
-	return transform(
-		io.NopCloser(
-			bytes.NewReader(
-				buff.Bytes(),
-			),
-		),
-	)
+	return transform(resp.Body)
 }

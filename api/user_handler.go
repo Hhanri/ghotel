@@ -21,7 +21,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 
 	user, err := h.store.User.GetUserByID(c.Context(), id)
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 	return c.JSON(user)
 }
@@ -29,7 +29,7 @@ func (h *UserHandler) HandleGetUser(c *fiber.Ctx) error {
 func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 	users, err := h.store.User.GetUsers(c.Context())
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 	return c.JSON(users)
 }
@@ -37,7 +37,7 @@ func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	var params types.CreateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	if err := params.Validate(); len(err) > 0 {
@@ -46,12 +46,12 @@ func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 
 	user, err := types.NewUserFromParams(params)
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	newUser, err := h.store.User.InsertUser(c.Context(), user)
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	return c.JSON(newUser)
@@ -77,12 +77,12 @@ func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 
 	var params types.UpdateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	err := h.store.User.UpdateUser(c.Context(), userID, params)
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	return c.JSON(

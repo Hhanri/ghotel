@@ -19,7 +19,7 @@ func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
 
 	hotels, err := h.store.Hotel.List(c.Context(), struct{}{})
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	return c.JSON(hotels)
@@ -30,7 +30,7 @@ func (h *HotelHandler) HandleGetRooms(c *fiber.Ctx) error {
 	id := c.Params("id")
 	rooms, err := h.store.Room.GetRoomsByID(c.Context(), id)
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 	return c.JSON(rooms)
 }
@@ -39,7 +39,7 @@ func (h *HotelHandler) HandleGetHotelByID(c *fiber.Ctx) error {
 	id := c.Params("id")
 	rooms, err := h.store.Hotel.GetByID(c.Context(), id)
 	if err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 	return c.JSON(rooms)
 }

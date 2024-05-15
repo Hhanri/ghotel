@@ -1,8 +1,6 @@
 package api
 
 import (
-	"fmt"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/db"
 	"github.com/hhanri/ghotel/types"
@@ -31,16 +29,16 @@ type AuthResponse struct {
 func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	var params AuthParams
 	if err := c.BodyParser(&params); err != nil {
-		return err
+		return fiberInternalErrorResponse(c)
 	}
 
 	user, err := h.store.User.GetUserByEmail(c.Context(), params.Email)
 	if err != nil {
-		return err
+		return fiberNotFoundErrorResponse(c)
 	}
 
 	if ok := user.VerifyPassword(params.Password); !ok {
-		return fmt.Errorf("invalid credentials")
+		return fiberInvalidCredentialsErrorResponse(c)
 	}
 
 	resp := AuthResponse{
