@@ -26,27 +26,36 @@ var invalidCredentialsErrorResponse = ErrorResponse{
 	StatusCode: http.StatusUnauthorized,
 }
 
+var expiredTokenErrorResponse = ErrorResponse{
+	Error:      "Expired Token",
+	StatusCode: http.StatusUnauthorized,
+}
+
 var unauthorizedErrorResponse = ErrorResponse{
 	Error:      "Unauthorized",
 	StatusCode: http.StatusUnauthorized,
 }
 
-func fiberErrorResponse(c *fiber.Ctx, err ErrorResponse) error {
+func FiberErrorResponse(c *fiber.Ctx, err ErrorResponse) error {
 	return c.Status(err.StatusCode).JSON(err)
 }
 
-func fiberInternalErrorResponse(c *fiber.Ctx) error {
-	return fiberErrorResponse(c, internalErrorResponse)
+func FiberInternalErrorResponse(c *fiber.Ctx) error {
+	return FiberErrorResponse(c, internalErrorResponse)
 }
 
-func fiberNotFoundErrorResponse(c *fiber.Ctx) error {
-	return fiberErrorResponse(c, notFoundErrorResponse)
+func FiberNotFoundErrorResponse(c *fiber.Ctx) error {
+	return FiberErrorResponse(c, notFoundErrorResponse)
 }
 
-func fiberUnauthorizedErrorResponse(c *fiber.Ctx) error {
-	return fiberErrorResponse(c, unauthorizedErrorResponse)
+func FiberUnauthorizedErrorResponse(c *fiber.Ctx) error {
+	return FiberErrorResponse(c, unauthorizedErrorResponse)
 }
 
-func fiberInvalidCredentialsErrorResponse(c *fiber.Ctx) error {
-	return fiberErrorResponse(c, invalidCredentialsErrorResponse)
+func FiberInvalidCredentialsErrorResponse(c *fiber.Ctx) error {
+	return FiberErrorResponse(c, invalidCredentialsErrorResponse)
+}
+
+func FiberExpiredTokenErrorResponse(c *fiber.Ctx) error {
+	return FiberErrorResponse(c, expiredTokenErrorResponse)
 }

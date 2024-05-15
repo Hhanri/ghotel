@@ -29,16 +29,16 @@ type AuthResponse struct {
 func (h *AuthHandler) HandleAuthenticate(c *fiber.Ctx) error {
 	var params AuthParams
 	if err := c.BodyParser(&params); err != nil {
-		return fiberInternalErrorResponse(c)
+		return FiberInternalErrorResponse(c)
 	}
 
 	user, err := h.store.User.GetUserByEmail(c.Context(), params.Email)
 	if err != nil {
-		return fiberNotFoundErrorResponse(c)
+		return FiberNotFoundErrorResponse(c)
 	}
 
 	if ok := user.VerifyPassword(params.Password); !ok {
-		return fiberInvalidCredentialsErrorResponse(c)
+		return FiberInvalidCredentialsErrorResponse(c)
 	}
 
 	resp := AuthResponse{
