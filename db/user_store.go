@@ -20,6 +20,7 @@ type UserStore interface {
 	InsertUser(context.Context, *types.User) (*types.User, error)
 	DeleteUser(context.Context, string) error
 	UpdateUser(context.Context, string, types.UpdateUserParams) error
+	GetUserByEmail(context.Context, string) (*types.User, error)
 }
 
 type MongoUserStore struct {
@@ -106,6 +107,21 @@ func (s *MongoUserStore) UpdateUser(ctx context.Context, id string, params types
 
 	_, err = s.coll.UpdateByID(ctx, oid, update)
 	return err
+}
+
+func (s *MongoUserStore) GetUserByEmail(ctx context.Context, email string) (*types.User, error) {
+	var user types.User
+	err := s.coll.FindOne(ctx, bson.M{"email": email}).Decode(&user)
+
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("not found")
+		}
+
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (s *MongoUserStore) Drop(ctx context.Context) error {

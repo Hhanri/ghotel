@@ -2,56 +2,20 @@ package api
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/hhanri/ghotel/db"
 	"github.com/hhanri/ghotel/types"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
-
-const testDbUri string = "mongodb://localhost:27017"
 
 var userParams = types.CreateUserParams{
 	FirstName: "Foo",
 	LastName:  "Bar",
 	Email:     "some@email.com",
 	Password:  "SomeRandomPassword",
-}
-
-type testDB struct {
-	*db.Store
-}
-
-func (db *testDB) teardown(t *testing.T) {
-	if err := db.User.Drop(context.Background()); err != nil {
-		t.Fatal(err)
-	}
-}
-
-func setup(t *testing.T) *testDB {
-	client, err := mongo.Connect(
-		context.TODO(),
-		options.Client().ApplyURI(testDbUri),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return &testDB{
-		Store: &db.Store{
-			User: db.NewMongoUserStore(client, db.TestDBNAME),
-		},
-	}
-}
-
-func newApp() *fiber.App {
-	return fiber.New()
 }
 
 func (h *UserHandler) seedUser(app *fiber.App, params *types.CreateUserParams) types.User {
@@ -78,15 +42,9 @@ func (h *UserHandler) getUser(app *fiber.App, id string) types.User {
 			json.NewDecoder(r).Decode(&user)
 			return user
 		},
+		defaultStatusHandler,
 	)
 	return user
-}
-
-func testRequest[T any](app *fiber.App, method string, path string, body io.Reader, transform func(io.ReadCloser) T) T {
-	request := httptest.NewRequest(method, path, body)
-	request.Header.Add("Content-Type", "application/json")
-	resp, _ := app.Test(request)
-	return transform(resp.Body)
 }
 
 func TestPostUser(t *testing.T) {
@@ -111,6 +69,7 @@ func TestPostUser(t *testing.T) {
 			json.NewDecoder(r).Decode(&user)
 			return user
 		},
+		defaultStatusHandler,
 	)
 
 	if user.FirstName != params.FirstName {
@@ -155,6 +114,7 @@ func TestGetUserByID(t *testing.T) {
 			json.NewDecoder(r).Decode(&user)
 			return user
 		},
+		defaultStatusHandler,
 	)
 
 	if user != dbUser {
@@ -184,6 +144,7 @@ func TestGetUsers(t *testing.T) {
 			json.NewDecoder(r).Decode(&users)
 			return users
 		},
+		defaultStatusHandler,
 	)
 
 	if users[0] != dbUser1 && users[1] != dbUser2 {
@@ -219,6 +180,7 @@ func TestUpdateUser(t *testing.T) {
 			_ = json.Unmarshal(b, &m)
 			return m["data"]
 		},
+		defaultStatusHandler,
 	)
 
 	if id != dbUser.ID {
@@ -258,6 +220,7 @@ func TestDeleteUser(t *testing.T) {
 			_ = json.Unmarshal(b, &m)
 			return m["data"]
 		},
+		defaultStatusHandler,
 	)
 
 	if id != dbUser.ID {

@@ -2,8 +2,11 @@ package types
 
 import (
 	"fmt"
+	"os"
 	"regexp"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -64,6 +67,35 @@ func NewUserFromParams(params CreateUserParams) (*User, error) {
 		EncryptedPassword: string(encpw),
 	}, nil
 
+}
+
+func (u *User) VerifyPassword(password string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(u.EncryptedPassword), []byte(password))
+	if err != nil {
+		fmt.Println(err)
+	}
+	return err == nil
+}
+
+func (u *User) CreateJWT() string {
+	now := time.Now()
+	expiresAt := now.Add(time.Hour * 4).Unix()
+	claims := jwt.MapClaims{
+		"id":        u.ID,
+		"email":     u.Email,
+		"expiresAt": expiresAt,
+	}
+	token := jwt.NewWithClaims(
+		jwt.SigningMethodHS256,
+		claims,
+	)
+	secret := os.Getenv("JWT_SECRET")
+	tokenStr, err := token.SignedString([]byte(secret))
+	fmt.Println(secret)
+	if err != nil {
+		fmt.Println("failed to sign token with secret")
+	}
+	return tokenStr
 }
 
 type UpdateUserParams struct {
