@@ -7,9 +7,21 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/hhanri/ghotel/api"
+	"github.com/hhanri/ghotel/db"
 )
 
-func JWTAuthentication(c *fiber.Ctx) error {
+type JWTMiddleware struct {
+	store *db.Store
+}
+
+func NewJWTMiddleware(store *db.Store) *JWTMiddleware {
+	return &JWTMiddleware{
+		store: store,
+	}
+}
+
+func (m *JWTMiddleware) JWTAuthentication(c *fiber.Ctx) error {
 	fmt.Println("-- JWT Auth --")
 
 	token := c.Get("X-Api-Token")
@@ -19,7 +31,7 @@ func JWTAuthentication(c *fiber.Ctx) error {
 
 	claims, err := parseJWT(token)
 	if err != nil {
-		return err
+		return api.FiberUnauthorizedErrorResponse(c)
 	}
 
 	expiresAtFloat, ok := claims["expiresAt"].(float64)
@@ -32,6 +44,16 @@ func JWTAuthentication(c *fiber.Ctx) error {
 	expired := time.Now().Unix() > expiresAt
 	if expired {
 		return api.FiberExpiredTokenErrorResponse(c)
+	}
+
+	id, ok := claims["id"].(string)
+	if !ok {
+		return api.FiberUnauthorizedErrorResponse(c)
+	}
+
+	_, err = m.store.User.GetUserByID(c.Context(), id)
+	if err != nil {
+		return api.FiberUnauthorizedErrorResponse(c)
 	}
 
 	return c.Next()

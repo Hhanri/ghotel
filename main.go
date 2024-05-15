@@ -24,11 +24,6 @@ func main() {
 	listenAddr := flag.String("listenAddr", ":9090", "Listen address of the api server")
 	flag.Parse()
 
-	app := fiber.New(config)
-
-	apiRoot := app.Group("/api")
-	apiV1 := app.Group("/api/v1", middleware.JWTAuthentication)
-
 	client, err := db.NewMongoClient(*dbUri)
 	if err != nil {
 		log.Fatal(err)
@@ -45,10 +40,18 @@ func main() {
 		Room:  roomStore,
 	}
 
+	// middlewares
+	jwtMiddleware := middleware.NewJWTMiddleware(store)
+
 	// handlers initialization
 	authHandler := api.NewAuthHandler(store)
 	userHandler := api.NewUserHandler(store)
 	hotelHandler := api.NewHotelHandler(store)
+
+	// app
+	app := fiber.New(config)
+	apiRoot := app.Group("/api")
+	apiV1 := app.Group("/api/v1", jwtMiddleware.JWTAuthentication)
 
 	// auth
 	apiRoot.Post("/auth", authHandler.HandleAuthenticate)
