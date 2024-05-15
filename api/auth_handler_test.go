@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"reflect"
@@ -55,11 +54,11 @@ func TestAutheticateFailureWrongPassword(t *testing.T) {
 			_ = json.Unmarshal(b, &resp)
 			return resp
 		},
-		func(status int, body string) {
+		func(status int, err ErrorResponse) {
 			if status == http.StatusOK {
 				t.Fatal("expected authentication failure")
 			}
-			if body != "invalid credentials" {
+			if !reflect.DeepEqual(err, invalidCredentialsErrorResponse) {
 				t.Fatal("expected to return invalid credentials")
 			}
 		},
@@ -94,14 +93,12 @@ func TestAutheticateFailureNonExistingUser(t *testing.T) {
 			_ = json.Unmarshal(b, &resp)
 			return resp
 		},
-		func(status int, body string) {
-
-			fmt.Println(body)
+		func(status int, err ErrorResponse) {
 			if status == http.StatusOK {
 				t.Fatal("expected authentication failure")
 			}
-			if body != "not found" {
-				t.Fatal("expected to return not found/")
+			if !reflect.DeepEqual(err, notFoundErrorResponse) {
+				t.Fatal("expected to return not found")
 			}
 		},
 	)
@@ -135,7 +132,7 @@ func TestAutheticateSuccess(t *testing.T) {
 			_ = json.Unmarshal(b, &authResp)
 			return authResp
 		},
-		func(status int, _ string) {
+		func(status int, _ ErrorResponse) {
 			if status != http.StatusOK {
 				t.Fatalf("expected authentication success but got %d", status)
 			}

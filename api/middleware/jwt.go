@@ -14,7 +14,7 @@ func JWTAuthentication(c *fiber.Ctx) error {
 
 	token := c.Get("X-Api-Token")
 	if token == "" {
-		return fmt.Errorf("Unauthorized")
+		return api.FiberUnauthorizedErrorResponse(c)
 	}
 
 	claims, err := parseJWT(token)
@@ -25,13 +25,13 @@ func JWTAuthentication(c *fiber.Ctx) error {
 	expiresAtFloat, ok := claims["expiresAt"].(float64)
 	if !ok {
 		fmt.Println("wrong format")
-		return fmt.Errorf("Unauthorized")
+		return api.FiberUnauthorizedErrorResponse(c)
 	}
 	expiresAt := int64(expiresAtFloat)
 
 	expired := time.Now().Unix() > expiresAt
 	if expired {
-		return fmt.Errorf("Token expired")
+		return api.FiberExpiredTokenErrorResponse(c)
 	}
 
 	return c.Next()
