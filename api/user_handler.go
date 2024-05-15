@@ -37,7 +37,7 @@ func (h *UserHandler) HandleGetUsers(c *fiber.Ctx) error {
 func (h *UserHandler) HandlePostUser(c *fiber.Ctx) error {
 	var params types.CreateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return FiberInternalErrorResponse(c)
+		return FiberBadRequestErrorResponse(c)
 	}
 
 	if err := params.Validate(); len(err) > 0 {
@@ -77,7 +77,7 @@ func (h *UserHandler) HandleUpdateUser(c *fiber.Ctx) error {
 
 	var params types.UpdateUserParams
 	if err := c.BodyParser(&params); err != nil {
-		return FiberInternalErrorResponse(c)
+		return FiberBadRequestErrorResponse(c)
 	}
 
 	err := h.store.User.UpdateUser(c.Context(), userID, params)
