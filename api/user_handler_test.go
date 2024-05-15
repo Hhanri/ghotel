@@ -42,6 +42,7 @@ func (h *UserHandler) getUser(app *fiber.App, id string) types.User {
 			json.NewDecoder(r).Decode(&user)
 			return user
 		},
+		defaultStatusHandler,
 	)
 	return user
 }
@@ -68,6 +69,7 @@ func TestPostUser(t *testing.T) {
 			json.NewDecoder(r).Decode(&user)
 			return user
 		},
+		defaultStatusHandler,
 	)
 
 	if user.FirstName != params.FirstName {
@@ -112,6 +114,7 @@ func TestGetUserByID(t *testing.T) {
 			json.NewDecoder(r).Decode(&user)
 			return user
 		},
+		defaultStatusHandler,
 	)
 
 	if user != dbUser {
@@ -141,6 +144,7 @@ func TestGetUsers(t *testing.T) {
 			json.NewDecoder(r).Decode(&users)
 			return users
 		},
+		defaultStatusHandler,
 	)
 
 	if users[0] != dbUser1 && users[1] != dbUser2 {
@@ -176,6 +180,7 @@ func TestUpdateUser(t *testing.T) {
 			_ = json.Unmarshal(b, &m)
 			return m["data"]
 		},
+		defaultStatusHandler,
 	)
 
 	if id != dbUser.ID {
@@ -215,6 +220,7 @@ func TestDeleteUser(t *testing.T) {
 			_ = json.Unmarshal(b, &m)
 			return m["data"]
 		},
+		defaultStatusHandler,
 	)
 
 	if id != dbUser.ID {

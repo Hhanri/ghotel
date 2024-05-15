@@ -1,6 +1,7 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"io"
 	"log"
@@ -45,9 +46,32 @@ func newApp() *fiber.App {
 	return fiber.New()
 }
 
-func testRequest[T any](app *fiber.App, method string, path string, body io.Reader, transform func(io.ReadCloser) T) T {
+func defaultStatusHandler(status int, body string) {}
+
+func testRequest[T any](
+	app *fiber.App,
+	method string,
+	path string,
+	body io.Reader,
+	transform func(io.ReadCloser) T,
+	handleStatus func(int, string),
+) T {
 	request := httptest.NewRequest(method, path, body)
 	request.Header.Add("Content-Type", "application/json")
 	resp, _ := app.Test(request)
-	return transform(resp.Body)
+
+	buff := bytes.Buffer{}
+	tee := io.TeeReader(resp.Body, &buff)
+	b, _ := io.ReadAll(tee)
+	resp.Body.Close()
+
+	handleStatus(resp.StatusCode, string(b))
+
+	return transform(
+		io.NopCloser(
+			bytes.NewReader(
+				buff.Bytes(),
+			),
+		),
+	)
 }
