@@ -36,6 +36,11 @@ var unauthorizedErrorResponse = ErrorResponse{
 	StatusCode: http.StatusUnauthorized,
 }
 
+var badRequestErrorResponse = ErrorResponse{
+	Error:      "Bad Request",
+	StatusCode: http.StatusBadRequest,
+}
+
 func FiberErrorResponse(c *fiber.Ctx, err ErrorResponse) error {
 	return c.Status(err.StatusCode).JSON(err)
 }
@@ -58,4 +63,8 @@ func FiberInvalidCredentialsErrorResponse(c *fiber.Ctx) error {
 
 func FiberExpiredTokenErrorResponse(c *fiber.Ctx) error {
 	return FiberErrorResponse(c, expiredTokenErrorResponse)
+}
+
+func FiberBadRequestErrorResponse(c *fiber.Ctx) error {
+	return FiberErrorResponse(c, badRequestErrorResponse)
 }
