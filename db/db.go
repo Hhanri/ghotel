@@ -12,9 +12,10 @@ const DBNAME = "ghotel"
 const TestDBNAME = "ghotel-test"
 
 type Store struct {
-	User  UserStore
-	Hotel HotelStore
-	Room  RoomStore
+	User    UserStore
+	Hotel   HotelStore
+	Room    RoomStore
+	Booking BookingStore
 }
 
 func ToObjectID(id string) (primitive.ObjectID, error) {

@@ -33,11 +33,13 @@ func main() {
 	userStore := db.NewMongoUserStore(client, db.DBNAME)
 	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
 	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
+	bookingStore := db.NewMongoBookingStore(client, db.DBNAME)
 
 	store := &db.Store{
-		User:  userStore,
-		Hotel: hotelStore,
-		Room:  roomStore,
+		User:    userStore,
+		Hotel:   hotelStore,
+		Room:    roomStore,
+		Booking: bookingStore,
 	}
 
 	// middlewares
@@ -47,6 +49,7 @@ func main() {
 	authHandler := api.NewAuthHandler(store)
 	userHandler := api.NewUserHandler(store)
 	hotelHandler := api.NewHotelHandler(store)
+	roomHandler := api.NewRoomHandler(store)
 
 	// app
 	app := fiber.New(config)
@@ -66,6 +69,9 @@ func main() {
 	// hotel handlers
 	apiV1.Get("/hotel", hotelHandler.HandleGetHotels)
 	apiV1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
+
+	// room handlers
+	apiV1.Post("/room/:id/book", roomHandler.HandleBookRoom)
 
 	app.Listen(*listenAddr)
 
