@@ -49,6 +49,7 @@ func main() {
 	authHandler := api.NewAuthHandler(store)
 	userHandler := api.NewUserHandler(store)
 	hotelHandler := api.NewHotelHandler(store)
+	roomHandler := api.NewRoomHandler(store)
 
 	// app
 	app := fiber.New(config)
@@ -68,6 +69,9 @@ func main() {
 	// hotel handlers
 	apiV1.Get("/hotel", hotelHandler.HandleGetHotels)
 	apiV1.Get("/hotel/:id/rooms", hotelHandler.HandleGetRooms)
+
+	// room handlers
+	apiV1.Post("/room/:id/book", roomHandler.HandleBookRoom)
 
 	app.Listen(*listenAddr)
 
