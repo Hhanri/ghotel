@@ -56,6 +56,7 @@ func main() {
 	app := fiber.New(config)
 	apiRoot := app.Group("/api")
 	apiV1 := app.Group("/api/v1", jwtMiddleware.JWTAuthentication)
+	adminRoute := apiV1.Group("/admin", middleware.AdminAuthentication)
 
 	// auth
 	apiRoot.Post("/auth", authHandler.HandleAuthenticate)
@@ -76,7 +77,7 @@ func main() {
 	apiV1.Get("/room", roomHandler.HandleGetAllRooms)
 
 	// booking handlers
-	apiV1.Get("/booking", bookingHandler.HandleGetBookings)
+	adminRoute.Get("/booking", bookingHandler.HandleGetBookings)
 	apiV1.Get("/booking/:id", bookingHandler.HandleGetBooking)
 
 	app.Listen(*listenAddr)
