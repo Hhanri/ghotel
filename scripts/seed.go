@@ -32,6 +32,10 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if err := userStore.Drop(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+
 	seedHotel(
 		hotelStore,
 		roomStore,
@@ -58,10 +62,19 @@ func main() {
 
 	seedUser(
 		userStore,
+		"ad",
+		"min",
+		"admin@ghotel.com",
+		"password",
+		true,
+	)
+	seedUser(
+		userStore,
 		"f1",
 		"l1",
 		"email1@email.com",
 		"password",
+		false,
 	)
 	seedUser(
 		userStore,
@@ -69,6 +82,7 @@ func main() {
 		"l2",
 		"email2@email.com",
 		"password",
+		false,
 	)
 
 }
@@ -133,7 +147,7 @@ func seedHotel(
 	)
 }
 
-func seedUser(userStore db.UserStore, firstName, lastName, email, password string) error {
+func seedUser(userStore db.UserStore, firstName, lastName, email, password string, isAdmin bool) error {
 	params := types.CreateUserParams{
 		FirstName: firstName,
 		LastName:  lastName,
@@ -141,6 +155,7 @@ func seedUser(userStore db.UserStore, firstName, lastName, email, password strin
 		Password:  password,
 	}
 	user, _ := types.NewUserFromParams(params)
+	user.IsAdmin = isAdmin
 	_, err := userStore.InsertUser(context.Background(), user)
 	return err
 }

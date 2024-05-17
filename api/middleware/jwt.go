@@ -51,11 +51,11 @@ func (m *JWTMiddleware) JWTAuthentication(c *fiber.Ctx) error {
 		return api.FiberUnauthorizedErrorResponse(c)
 	}
 
-	_, err = m.store.User.GetUserByID(c.Context(), id)
+	user, err := m.store.User.GetUserByID(c.Context(), id)
 	if err != nil {
 		return api.FiberUnauthorizedErrorResponse(c)
 	}
-	c.Context().SetUserValue("userId", id)
+	c.Context().SetUserValue("user", user)
 	return c.Next()
 }
 
