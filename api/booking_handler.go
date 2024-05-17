@@ -24,5 +24,10 @@ func (h *BookingHandler) HandleGetBookings(c *fiber.Ctx) error {
 }
 
 func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
-	return nil
+	id := c.Params("id")
+	booking, err := h.store.Booking.GetByID(c.Context(), id)
+	if err != nil {
+		return FiberNotFoundErrorResponse(c)
+	}
+	return c.JSON(booking)
 }
