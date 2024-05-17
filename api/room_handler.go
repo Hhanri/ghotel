@@ -28,6 +28,14 @@ type BookRoomParams struct {
 	NumPeople int       `json:"numPeople"`
 }
 
+func (h *RoomHandler) HandleGetAllRooms(c *fiber.Ctx) error {
+	rooms, err := h.store.Room.GetRooms(c.Context(), struct{}{})
+	if err != nil {
+		return FiberInternalErrorResponse(c)
+	}
+	return c.JSON(rooms)
+}
+
 func (p BookRoomParams) validate() error {
 	now := time.Now()
 	if now.After(p.FromDate) || p.UntilDate.Before(now) {
