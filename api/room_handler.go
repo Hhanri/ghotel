@@ -49,7 +49,7 @@ func (p BookRoomParams) validate() error {
 
 func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	roomId := c.Params("id")
-	userId, ok := c.Context().UserValue("userId").(string)
+	user, ok := c.Context().UserValue("user").(*types.User)
 	if !ok {
 		return FiberInternalErrorResponse(c)
 	}
@@ -84,7 +84,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	}
 
 	booking := types.Booking{
-		UserID:    userId,
+		UserID:    user.ID,
 		RoomdID:   roomId,
 		FromDate:  params.FromDate,
 		UntilDate: params.UntilDate,
