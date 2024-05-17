@@ -3,6 +3,7 @@ package api
 import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/db"
+	"github.com/hhanri/ghotel/types"
 )
 
 type BookingHandler struct {
@@ -29,5 +30,14 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	if err != nil {
 		return FiberNotFoundErrorResponse(c)
 	}
+
+	user, ok := c.Context().UserValue("user").(*types.User)
+	if !ok {
+		return FiberInternalErrorResponse(c)
+	}
+	if user.ID != booking.UserID {
+		return FiberUnauthorizedErrorResponse(c)
+	}
+
 	return c.JSON(booking)
 }
