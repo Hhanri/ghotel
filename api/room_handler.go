@@ -49,9 +49,9 @@ func (p BookRoomParams) validate() error {
 
 func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	roomId := c.Params("id")
-	user, ok := c.Context().UserValue("user").(*types.User)
-	if !ok {
-		return FiberInternalErrorResponse(c)
+	user, err := GetAuth(c.Context())
+	if err != nil {
+		return FiberUnauthorizedErrorResponse(c)
 	}
 
 	var params BookRoomParams
@@ -73,7 +73,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 		return FiberBadRequestErrorResponse(c)
 	}
 
-	ok, err = h.isRoomAvailable(c.Context(), roomId, params)
+	ok, err := h.isRoomAvailable(c.Context(), roomId, params)
 	if err != nil {
 		return FiberInternalErrorResponse(c)
 	}

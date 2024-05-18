@@ -5,7 +5,6 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/db"
-	"github.com/hhanri/ghotel/types"
 )
 
 type BookingHandler struct {
@@ -33,9 +32,9 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 		return FiberNotFoundErrorResponse(c)
 	}
 
-	user, ok := c.Context().UserValue("user").(*types.User)
-	if !ok {
-		return FiberInternalErrorResponse(c)
+	user, err := GetAuth(c.Context())
+	if err != nil {
+		return FiberUnauthorizedErrorResponse(c)
 	}
 	if user.ID != booking.UserID {
 		return FiberUnauthorizedErrorResponse(c)
@@ -51,9 +50,9 @@ func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
 	if err != nil {
 		return FiberInternalErrorResponse(c)
 	}
-	user, ok := c.Context().UserValue("user").(*types.User)
-	if !ok {
-		return FiberInternalErrorResponse(c)
+	user, err := GetAuth(c.Context())
+	if err != nil {
+		return FiberUnauthorizedErrorResponse(c)
 	}
 	if booking.UserID != user.ID && !user.IsAdmin {
 		return FiberUnauthorizedErrorResponse(c)
