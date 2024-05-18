@@ -1,6 +1,8 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/db"
 	"github.com/hhanri/ghotel/types"
@@ -40,4 +42,32 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(booking)
+}
+
+func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	booking, err := h.store.Booking.GetByID(c.Context(), id)
+	if err != nil {
+		return FiberInternalErrorResponse(c)
+	}
+	user, ok := c.Context().UserValue("user").(*types.User)
+	if !ok {
+		return FiberInternalErrorResponse(c)
+	}
+	if booking.UserID != user.ID && !user.IsAdmin {
+		return FiberUnauthorizedErrorResponse(c)
+	}
+
+	err = h.store.Booking.Cancel(c.Context(), id)
+	if err != nil {
+		fmt.Println(err)
+		return FiberInternalErrorResponse(c)
+	}
+
+	return c.JSON(
+		map[string]string{
+			"data": id,
+		},
+	)
 }
