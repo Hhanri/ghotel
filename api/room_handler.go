@@ -68,8 +68,12 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 			},
 		)
 	}
+	exists, err := h.roomExists(c.Context(), roomId)
+	if err != nil || !exists {
+		return FiberBadRequestErrorResponse(c)
+	}
 
-	ok, err := h.isRoomAvailable(c.Context(), roomId, params)
+	ok, err = h.isRoomAvailable(c.Context(), roomId, params)
 	if err != nil {
 		return FiberInternalErrorResponse(c)
 	}
@@ -97,6 +101,14 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(inserted)
+}
+
+func (h *RoomHandler) roomExists(ctx context.Context, roomId string) (bool, error) {
+	room, err := h.store.Room.GetRoomByID(ctx, roomId)
+	if err != nil {
+		return false, err
+	}
+	return room != nil, nil
 }
 
 func (h *RoomHandler) isRoomAvailable(
