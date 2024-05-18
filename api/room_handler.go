@@ -112,6 +112,7 @@ func (h *RoomHandler) isRoomAvailable(
 		"untilDate": bson.M{
 			"$lte": params.UntilDate,
 		},
+		"canceled": false,
 	}
 
 	bookings, err := h.store.Booking.GetAll(
