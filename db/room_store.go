@@ -14,6 +14,7 @@ type RoomStore interface {
 	Insert(context.Context, *types.Room) (*types.Room, error)
 	GetRooms(context.Context, interface{}) ([]*types.Room, error)
 	GetRoomsByID(context.Context, string) ([]*types.Room, error)
+	GetRoomByID(context.Context, string) (*types.Room, error)
 }
 
 type MongoRoomStore struct {
@@ -62,6 +63,21 @@ func (s *MongoRoomStore) GetRooms(ctx context.Context, filter interface{}) ([]*t
 
 func (s *MongoRoomStore) GetRoomsByID(ctx context.Context, id string) ([]*types.Room, error) {
 	return s.GetRooms(ctx, bson.M{"hotelId": id})
+}
+
+func (s *MongoRoomStore) GetRoomByID(ctx context.Context, id string) (*types.Room, error) {
+	oid, err := ToObjectID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var room types.Room
+	err = s.coll.FindOne(ctx, bson.M{"_id": oid}).Decode(&room)
+	if err != nil {
+		return nil, err
+	}
+
+	return &room, nil
 }
 
 func (s *MongoRoomStore) Drop(ctx context.Context) error {
