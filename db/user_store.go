@@ -125,6 +125,5 @@ func (s *MongoUserStore) GetUserByEmail(ctx context.Context, email string) (*typ
 }
 
 func (s *MongoUserStore) Drop(ctx context.Context) error {
-	fmt.Println("--- dropping user collection ---")
 	return s.coll.Drop(ctx)
 }

@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"fmt"
 	"log"
+	"time"
 
 	"github.com/hhanri/ghotel/db"
+	"github.com/hhanri/ghotel/db/fixtures"
 	"github.com/hhanri/ghotel/types"
 )
 
@@ -23,6 +24,14 @@ func main() {
 	userStore := db.NewMongoUserStore(client, db.DBNAME)
 	hotelStore := db.NewMongoHotelStore(client, db.DBNAME)
 	roomStore := db.NewMongoRoomStore(client, db.DBNAME, hotelStore)
+	bookingStore := db.NewMongoBookingStore(client, db.DBNAME)
+
+	store := &db.Store{
+		User:    userStore,
+		Hotel:   hotelStore,
+		Room:    roomStore,
+		Booking: bookingStore,
+	}
 
 	if err := roomStore.Drop(context.Background()); err != nil {
 		log.Fatal(err)
@@ -36,48 +45,55 @@ func main() {
 		log.Fatal(err)
 	}
 
-	seedHotel(
-		hotelStore,
-		roomStore,
+	if err := bookingStore.Drop(context.Background()); err != nil {
+		log.Fatal(err)
+	}
+
+	hotel := fixtures.AddHotel(
+		store,
 		"Belluga",
 		"France",
 		0,
 	)
 
-	seedHotel(
-		hotelStore,
-		roomStore,
-		"Bellutwo",
-		"France",
-		5,
+	room1 := fixtures.AddRoom(
+		store,
+		hotel.ID,
+		&types.Room{
+			Size:    "small",
+			Seaside: false,
+			Price:   99.99,
+		},
 	)
 
-	seedHotel(
-		hotelStore,
-		roomStore,
-		"Cheese",
-		"United Kingdom",
-		3,
+	room2 := fixtures.AddRoom(
+		store,
+		hotel.ID,
+		&types.Room{
+			Size:    "king",
+			Seaside: true,
+			Price:   179.99,
+		},
 	)
 
-	seedUser(
-		userStore,
+	fixtures.AddUser(
+		store,
 		"ad",
 		"min",
 		"admin@ghotel.com",
 		"password",
 		true,
 	)
-	seedUser(
-		userStore,
+	user1 := fixtures.AddUser(
+		store,
 		"f1",
 		"l1",
 		"email1@email.com",
 		"password",
 		false,
 	)
-	seedUser(
-		userStore,
+	user2 := fixtures.AddUser(
+		store,
 		"f2",
 		"l2",
 		"email2@email.com",
@@ -85,77 +101,20 @@ func main() {
 		false,
 	)
 
-}
-
-func insertHotelAndRooms(
-	hotelStore db.HotelStore,
-	roomStore db.RoomStore,
-	hotel *types.Hotel,
-	rooms []*types.Room,
-) error {
-	ctx := context.Background()
-
-	insertedHotel, err := hotelStore.Insert(ctx, hotel)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	for _, room := range rooms {
-		room.HotelID = insertedHotel.ID
-		_, err := roomStore.Insert(ctx, room)
-		if err != nil {
-			return err
-		}
-		fmt.Printf("Inserted %+v\n", room)
-	}
-
-	return nil
-}
-
-func seedHotel(
-	hotelStore db.HotelStore,
-	roomStore db.RoomStore,
-	name string,
-	location string,
-	rating int,
-) error {
-	hotel := &types.Hotel{
-		Name:     name,
-		Location: location,
-		Rooms:    []string{},
-		Rating:   rating,
-	}
-	roomA := &types.Room{
-		Size:    "small",
-		Seaside: false,
-		Price:   99.99,
-	}
-	roomB := &types.Room{
-		Size:    "king",
-		Seaside: true,
-		Price:   179.99,
-	}
-
-	return insertHotelAndRooms(
-		hotelStore,
-		roomStore,
-		hotel,
-		[]*types.Room{
-			roomA,
-			roomB,
-		},
+	fixtures.AddBooking(
+		store,
+		user1.ID,
+		room1.ID,
+		time.Now(),
+		time.Now().Add(time.Hour*24),
 	)
-}
 
-func seedUser(userStore db.UserStore, firstName, lastName, email, password string, isAdmin bool) error {
-	params := types.CreateUserParams{
-		FirstName: firstName,
-		LastName:  lastName,
-		Email:     email,
-		Password:  password,
-	}
-	user, _ := types.NewUserFromParams(params)
-	user.IsAdmin = isAdmin
-	_, err := userStore.InsertUser(context.Background(), user)
-	return err
+	fixtures.AddBooking(
+		store,
+		user2.ID,
+		room2.ID,
+		time.Now(),
+		time.Now().Add(time.Hour*24),
+	)
+
 }

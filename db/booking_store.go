@@ -81,3 +81,7 @@ func (s *MongoBookingStore) Cancel(ctx context.Context, id string) error {
 	_, err = s.coll.UpdateByID(ctx, oid, update)
 	return err
 }
+
+func (s *MongoBookingStore) Drop(ctx context.Context) error {
+	return s.coll.Drop(ctx)
+}
