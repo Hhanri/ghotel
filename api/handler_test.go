@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"io"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,29 +15,35 @@ import (
 )
 
 type testDB struct {
+	client *mongo.Client
 	*db.Store
 }
 
 var testDbUri string = "mongodb://ghotel:secret@localhost:27017/"
 
-func (db *testDB) teardown(t *testing.T) {
-	if err := db.User.Drop(context.Background()); err != nil {
+func (tdb *testDB) teardown(t *testing.T) {
+	if err := tdb.client.Database(db.TestDBNAME).Drop(context.Background()); err != nil {
 		t.Fatal(err)
 	}
 }
 
 func setup(t *testing.T) *testDB {
-
 	client, err := mongo.Connect(
 		context.TODO(),
 		options.Client().ApplyURI(testDbUri),
 	)
 	if err != nil {
-		log.Fatal(err)
+		t.Fatal(err)
 	}
+
+	hotelStore := db.NewMongoHotelStore(client, db.TestDBNAME)
 	return &testDB{
+		client: client,
 		Store: &db.Store{
-			User: db.NewMongoUserStore(client, db.TestDBNAME),
+			User:    db.NewMongoUserStore(client, db.TestDBNAME),
+			Booking: db.NewMongoBookingStore(client, db.TestDBNAME),
+			Hotel:   hotelStore,
+			Room:    db.NewMongoRoomStore(client, db.TestDBNAME, hotelStore),
 		},
 	}
 }
