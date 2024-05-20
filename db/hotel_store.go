@@ -6,6 +6,7 @@ import (
 	"github.com/hhanri/ghotel/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const hotelsColl = "hotels"
@@ -15,7 +16,7 @@ type HotelStore interface {
 
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	AddRoom(context.Context, *types.Room) error
-	List(context.Context, interface{}) ([]*types.Hotel, error)
+	List(context.Context, interface{}, Pagination) ([]*types.Hotel, error)
 	GetByID(context.Context, string) (*types.Hotel, error)
 }
 
@@ -62,8 +63,12 @@ func (s *MongoHotelStore) Drop(ctx context.Context) error {
 	return s.coll.Drop(ctx)
 }
 
-func (s *MongoHotelStore) List(ctx context.Context, filter interface{}) ([]*types.Hotel, error) {
-	res, err := s.coll.Find(ctx, filter)
+func (s *MongoHotelStore) List(ctx context.Context, filter interface{}, pagination Pagination) ([]*types.Hotel, error) {
+	opts := options.FindOptions{}
+	opts.SetSkip((pagination.Page - 1) * pagination.Limit)
+	opts.SetLimit(pagination.Limit)
+
+	res, err := s.coll.Find(ctx, filter, &opts)
 	if err != nil {
 		return nil, err
 	}
