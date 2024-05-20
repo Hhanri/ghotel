@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/hhanri/ghotel/api/api_error"
 	"github.com/hhanri/ghotel/db"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -52,7 +53,7 @@ func newApp() *fiber.App {
 	return fiber.New()
 }
 
-func defaultStatusHandler(status int, err ErrorResponse) {}
+func defaultStatusHandler(status int, err api_error.ErrorResponse) {}
 
 func testRequest[T any](
 	app *fiber.App,
@@ -60,14 +61,14 @@ func testRequest[T any](
 	path string,
 	body io.Reader,
 	transform func(io.ReadCloser) T,
-	handleStatus func(int, ErrorResponse),
+	handleStatus func(int, api_error.ErrorResponse),
 ) T {
 	request := httptest.NewRequest(method, path, body)
 	request.Header.Add("Content-Type", "application/json")
 	resp, _ := app.Test(request)
 
 	if resp.StatusCode != http.StatusOK {
-		var errorResp ErrorResponse
+		var errorResp api_error.ErrorResponse
 		_ = json.NewDecoder(resp.Body).Decode(&errorResp)
 		handleStatus(resp.StatusCode, errorResp)
 	}

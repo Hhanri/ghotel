@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/hhanri/ghotel/api/api_error"
 	"github.com/hhanri/ghotel/db"
 )
 
@@ -20,7 +21,7 @@ func NewBookingHandler(store *db.Store) *BookingHandler {
 func (h *BookingHandler) HandleGetBookings(c *fiber.Ctx) error {
 	bookings, err := h.store.Booking.GetAll(c.Context(), struct{}{})
 	if err != nil {
-		return FiberInternalErrorResponse(c)
+		return api_error.FiberInternalErrorResponse(c)
 	}
 	return c.JSON(bookings)
 }
@@ -29,15 +30,15 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 	id := c.Params("id")
 	booking, err := h.store.Booking.GetByID(c.Context(), id)
 	if err != nil {
-		return FiberNotFoundErrorResponse(c)
+		return api_error.FiberNotFoundErrorResponse(c)
 	}
 
 	user, err := GetAuth(c.Context())
 	if err != nil {
-		return FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 	if user.ID != booking.UserID {
-		return FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 
 	return c.JSON(booking)
@@ -48,20 +49,20 @@ func (h *BookingHandler) HandleCancelBooking(c *fiber.Ctx) error {
 
 	booking, err := h.store.Booking.GetByID(c.Context(), id)
 	if err != nil {
-		return FiberInternalErrorResponse(c)
+		return api_error.FiberInternalErrorResponse(c)
 	}
-	user, err := GetAuth(c.Context())
+	user, err := api_util.GetAuth(c.Context())
 	if err != nil {
-		return FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 	if booking.UserID != user.ID && !user.IsAdmin {
-		return FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 
 	err = h.store.Booking.Cancel(c.Context(), id)
 	if err != nil {
 		fmt.Println(err)
-		return FiberInternalErrorResponse(c)
+		return api_error.FiberInternalErrorResponse(c)
 	}
 
 	return c.JSON(

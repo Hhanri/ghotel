@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/hhanri/ghotel/api/api_error"
 	"github.com/hhanri/ghotel/types"
 )
 
@@ -54,11 +55,11 @@ func TestAutheticateFailureWrongPassword(t *testing.T) {
 			_ = json.Unmarshal(b, &resp)
 			return resp
 		},
-		func(status int, err ErrorResponse) {
+		func(status int, err api_error.ErrorResponse) {
 			if status == http.StatusOK {
 				t.Fatal("expected authentication failure")
 			}
-			if !reflect.DeepEqual(err, invalidCredentialsErrorResponse) {
+			if !reflect.DeepEqual(err, api_error.InvalidCredentialsErrorResponse) {
 				t.Fatal("expected to return invalid credentials")
 			}
 		},
@@ -93,11 +94,11 @@ func TestAutheticateFailureNonExistingUser(t *testing.T) {
 			_ = json.Unmarshal(b, &resp)
 			return resp
 		},
-		func(status int, err ErrorResponse) {
+		func(status int, err api_error.ErrorResponse) {
 			if status == http.StatusOK {
 				t.Fatal("expected authentication failure")
 			}
-			if !reflect.DeepEqual(err, notFoundErrorResponse) {
+			if !reflect.DeepEqual(err, api_error.NotFoundErrorResponse) {
 				t.Fatal("expected to return not found")
 			}
 		},
@@ -132,7 +133,7 @@ func TestAutheticateSuccess(t *testing.T) {
 			_ = json.Unmarshal(b, &authResp)
 			return authResp
 		},
-		func(status int, _ ErrorResponse) {
+		func(status int, _ api_error.ErrorResponse) {
 			if status != http.StatusOK {
 				t.Fatalf("expected authentication success but got %d", status)
 			}

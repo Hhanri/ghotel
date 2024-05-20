@@ -7,7 +7,8 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/hhanri/ghotel/api"
+
+	"github.com/hhanri/ghotel/api/api_error"
 	"github.com/hhanri/ghotel/db"
 )
 
@@ -26,34 +27,34 @@ func (m *JWTMiddleware) JWTAuthentication(c *fiber.Ctx) error {
 
 	token := c.Get("X-Api-Token")
 	if token == "" {
-		return api.FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 
 	claims, err := parseJWT(token)
 	if err != nil {
-		return api.FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 
 	expiresAtFloat, ok := claims["expiresAt"].(float64)
 	if !ok {
 		fmt.Println("wrong format")
-		return api.FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 	expiresAt := int64(expiresAtFloat)
 
 	expired := time.Now().Unix() > expiresAt
 	if expired {
-		return api.FiberExpiredTokenErrorResponse(c)
+		return api_error.FiberExpiredTokenErrorResponse(c)
 	}
 
 	id, ok := claims["id"].(string)
 	if !ok {
-		return api.FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 
 	user, err := m.store.User.GetUserByID(c.Context(), id)
 	if err != nil {
-		return api.FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 	c.Context().SetUserValue("user", user)
 	return c.Next()
