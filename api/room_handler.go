@@ -41,10 +41,10 @@ func (h *RoomHandler) HandleGetAllRooms(c *fiber.Ctx) error {
 func (p BookRoomParams) validate() error {
 	now := time.Now()
 	if now.After(p.FromDate) || p.UntilDate.Before(now) {
-		return fmt.Errorf("Can not book a room from before now")
+		return fmt.Errorf("can not book a room from before now")
 	}
 	if p.UntilDate.Before(p.FromDate) {
-		return fmt.Errorf("Until must be after From")
+		return fmt.Errorf("until must be after From")
 	}
 	return nil
 }
