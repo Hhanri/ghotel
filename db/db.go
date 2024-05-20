@@ -36,3 +36,8 @@ func NewMongoClient(dbUri string) (*mongo.Client, error) {
 		options.Client().ApplyURI(dbUri),
 	)
 }
+
+type Pagination struct {
+	Limit int64
+	Page  int64
+}
