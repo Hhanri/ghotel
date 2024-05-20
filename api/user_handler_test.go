@@ -36,6 +36,7 @@ func (h *UserHandler) getUser(app *fiber.App, id string) types.User {
 		app,
 		"GET",
 		"/"+id,
+		"",
 		nil,
 		func(r io.ReadCloser) types.User {
 			var user types.User
@@ -63,6 +64,7 @@ func TestPostUser(t *testing.T) {
 		app,
 		"POST",
 		"/",
+		"",
 		bytes.NewReader(b),
 		func(r io.ReadCloser) types.User {
 			var user types.User
@@ -108,6 +110,7 @@ func TestGetUserByID(t *testing.T) {
 		app,
 		"GET",
 		"/"+dbUser.ID,
+		"",
 		nil,
 		func(r io.ReadCloser) types.User {
 			var user types.User
@@ -138,6 +141,7 @@ func TestGetUsers(t *testing.T) {
 		app,
 		"GET",
 		"/",
+		"",
 		nil,
 		func(r io.ReadCloser) []types.User {
 			var users []types.User
@@ -173,6 +177,7 @@ func TestUpdateUser(t *testing.T) {
 		app,
 		"PUT",
 		"/"+dbUser.ID,
+		"",
 		bytes.NewReader(b),
 		func(r io.ReadCloser) string {
 			b, _ := io.ReadAll(r)
@@ -213,6 +218,7 @@ func TestDeleteUser(t *testing.T) {
 		app,
 		"DELETE",
 		"/"+dbUser.ID,
+		"",
 		nil,
 		func(r io.ReadCloser) string {
 			b, _ := io.ReadAll(r)

@@ -59,12 +59,14 @@ func testRequest[T any](
 	app *fiber.App,
 	method string,
 	path string,
+	jwt string,
 	body io.Reader,
 	transform func(io.ReadCloser) T,
 	handleStatus func(int, api_error.ErrorResponse),
 ) T {
 	request := httptest.NewRequest(method, path, body)
 	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("X-Api-Token", jwt)
 	resp, _ := app.Test(request)
 
 	if resp.StatusCode != http.StatusOK {

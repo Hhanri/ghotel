@@ -48,6 +48,7 @@ func TestAutheticateFailureWrongPassword(t *testing.T) {
 		app,
 		"POST",
 		"/auth",
+		"",
 		bytes.NewReader(b),
 		func(r io.ReadCloser) AuthResponse {
 			b, _ := io.ReadAll(r)
@@ -87,6 +88,7 @@ func TestAutheticateFailureNonExistingUser(t *testing.T) {
 		app,
 		"POST",
 		"/auth",
+		"",
 		bytes.NewReader(b),
 		func(r io.ReadCloser) AuthResponse {
 			b, _ := io.ReadAll(r)
@@ -126,6 +128,7 @@ func TestAutheticateSuccess(t *testing.T) {
 		app,
 		"POST",
 		"/auth",
+		"",
 		bytes.NewReader(b),
 		func(r io.ReadCloser) AuthResponse {
 			b, _ := io.ReadAll(r)
