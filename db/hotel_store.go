@@ -11,12 +11,18 @@ import (
 
 const hotelsColl = "hotels"
 
+type HotelQueryParams struct {
+	Pagination
+	Rating   int
+	Location string
+}
+
 type HotelStore interface {
 	Dropper
 
 	Insert(context.Context, *types.Hotel) (*types.Hotel, error)
 	AddRoom(context.Context, *types.Room) error
-	List(context.Context, interface{}, Pagination) ([]*types.Hotel, error)
+	List(context.Context, HotelQueryParams) ([]*types.Hotel, error)
 	GetByID(context.Context, string) (*types.Hotel, error)
 }
 
@@ -27,6 +33,13 @@ type MongoHotelStore struct {
 
 func NewMongoHotelStore(c *mongo.Client, dbName string) *MongoHotelStore {
 	coll := c.Database(dbName).Collection(hotelsColl)
+
+	model := mongo.IndexModel{Keys: bson.M{"location": "text"}}
+	_, err := coll.Indexes().CreateOne(context.TODO(), model)
+	if err != nil {
+		panic(err)
+	}
+
 	return &MongoHotelStore{
 		client: c,
 		coll:   coll,
@@ -63,10 +76,20 @@ func (s *MongoHotelStore) Drop(ctx context.Context) error {
 	return s.coll.Drop(ctx)
 }
 
-func (s *MongoHotelStore) List(ctx context.Context, filter interface{}, pagination Pagination) ([]*types.Hotel, error) {
+func (s *MongoHotelStore) List(ctx context.Context, queryParams HotelQueryParams) ([]*types.Hotel, error) {
 	opts := options.FindOptions{}
-	opts.SetSkip((pagination.Page - 1) * pagination.Limit)
-	opts.SetLimit(pagination.Limit)
+	opts.SetSkip((queryParams.Page - 1) * queryParams.Limit)
+	opts.SetLimit(queryParams.Limit)
+
+	filter := bson.M{}
+	if queryParams.Rating != 0 {
+		filter["rating"] = queryParams.Rating
+	}
+	if queryParams.Location != "" {
+		filter["$text"] = bson.M{
+			"$search": queryParams.Location,
+		}
+	}
 
 	res, err := s.coll.Find(ctx, filter, &opts)
 	if err != nil {

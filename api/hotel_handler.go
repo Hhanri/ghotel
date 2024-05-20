@@ -18,12 +18,12 @@ func NewHotelHandler(store *db.Store) *HotelHandler {
 }
 
 func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
-	var pagination db.Pagination
-	if err := c.QueryParser(&pagination); err != nil {
+	var params db.HotelQueryParams
+	if err := c.QueryParser(&params); err != nil {
 		return api_error.BadRequestErrorResponse
 	}
 
-	hotels, err := h.store.Hotel.List(c.Context(), struct{}{}, pagination)
+	hotels, err := h.store.Hotel.List(c.Context(), params)
 	if err != nil {
 		return api_error.InternalErrorResponse
 	}
@@ -31,7 +31,7 @@ func (h *HotelHandler) HandleGetHotels(c *fiber.Ctx) error {
 	return c.JSON(
 		api_util.NewResourceResponse(
 			hotels,
-			int(pagination.Page),
+			int(params.Page),
 		),
 	)
 
