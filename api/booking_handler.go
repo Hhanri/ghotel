@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/api/api_error"
+	"github.com/hhanri/ghotel/api/api_util"
 	"github.com/hhanri/ghotel/db"
 )
 
@@ -33,7 +34,7 @@ func (h *BookingHandler) HandleGetBooking(c *fiber.Ctx) error {
 		return api_error.FiberNotFoundErrorResponse(c)
 	}
 
-	user, err := GetAuth(c.Context())
+	user, err := api_util.GetAuth(c.Context())
 	if err != nil {
 		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
