@@ -9,10 +9,10 @@ import (
 func AdminAuthentication(c *fiber.Ctx) error {
 	user, err := api_util.GetAuth(c.Context())
 	if err != nil {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 	if !user.IsAdmin {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 	return c.Next()
 }

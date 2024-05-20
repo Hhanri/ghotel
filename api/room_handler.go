@@ -33,7 +33,7 @@ type BookRoomParams struct {
 func (h *RoomHandler) HandleGetAllRooms(c *fiber.Ctx) error {
 	rooms, err := h.store.Room.GetRooms(c.Context(), struct{}{})
 	if err != nil {
-		return api_error.FiberInternalErrorResponse(c)
+		return api_error.InternalErrorResponse
 	}
 	return c.JSON(rooms)
 }
@@ -53,40 +53,28 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	roomId := c.Params("id")
 	user, err := api_util.GetAuth(c.Context())
 	if err != nil {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 
 	var params BookRoomParams
 	if err := c.BodyParser(&params); err != nil {
-		return api_error.FiberBadRequestErrorResponse(c)
+		return api_error.BadRequestErrorResponse
 	}
 
 	if err := params.validate(); err != nil {
-		return api_error.FiberErrorResponse(
-			c,
-			api_error.ErrorResponse{
-				Error:      err.Error(),
-				StatusCode: http.StatusBadRequest,
-			},
-		)
+		return api_error.NewErrorResponse(http.StatusBadRequest, err.Error())
 	}
 	exists, err := h.roomExists(c.Context(), roomId)
 	if err != nil || !exists {
-		return api_error.FiberBadRequestErrorResponse(c)
+		return api_error.BadRequestErrorResponse
 	}
 
 	ok, err := h.isRoomAvailable(c.Context(), roomId, params)
 	if err != nil {
-		return api_error.FiberInternalErrorResponse(c)
+		return api_error.InternalErrorResponse
 	}
 	if !ok {
-		return api_error.FiberErrorResponse(
-			c,
-			api_error.ErrorResponse{
-				Error:      "Room already booked",
-				StatusCode: http.StatusNotAcceptable,
-			},
-		)
+		return api_error.NewErrorResponse(http.StatusNotAcceptable, "Room already booked")
 	}
 
 	booking := types.Booking{
@@ -99,7 +87,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 
 	inserted, err := h.store.Booking.Insert(c.Context(), &booking)
 	if err != nil {
-		return api_error.FiberBadRequestErrorResponse(c)
+		return api_error.BadRequestErrorResponse
 	}
 
 	return c.JSON(inserted)
