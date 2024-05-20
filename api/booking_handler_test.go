@@ -143,7 +143,7 @@ func TestAdminGetBookings(t *testing.T) {
 		},
 		func(code int, err api_error.ErrorResponse) {
 			if code != http.StatusOK {
-				t.Fatal(err.Error)
+				t.Fatal(err.Message)
 			}
 		},
 	)

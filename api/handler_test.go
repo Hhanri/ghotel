@@ -50,7 +50,7 @@ func setup(t *testing.T) *testDB {
 }
 
 func newApp() *fiber.App {
-	return fiber.New()
+	return fiber.New(fiber.Config{ErrorHandler: api_error.FiberErrorHandler})
 }
 
 func defaultStatusHandler(status int, err api_error.ErrorResponse) {}

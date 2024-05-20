@@ -27,34 +27,34 @@ func (m *JWTMiddleware) JWTAuthentication(c *fiber.Ctx) error {
 
 	token := c.Get("X-Api-Token")
 	if token == "" {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 
 	claims, err := parseJWT(token)
 	if err != nil {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 
 	expiresAtFloat, ok := claims["expiresAt"].(float64)
 	if !ok {
 		fmt.Println("wrong format")
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 	expiresAt := int64(expiresAtFloat)
 
 	expired := time.Now().Unix() > expiresAt
 	if expired {
-		return api_error.FiberExpiredTokenErrorResponse(c)
+		return api_error.ExpiredTokenErrorResponse
 	}
 
 	id, ok := claims["id"].(string)
 	if !ok {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 
 	user, err := m.store.User.GetUserByID(c.Context(), id)
 	if err != nil {
-		return api_error.FiberUnauthorizedErrorResponse(c)
+		return api_error.UnauthorizedErrorResponse
 	}
 	c.Context().SetUserValue("user", user)
 	return c.Next()

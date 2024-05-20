@@ -6,16 +6,13 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/api"
+	"github.com/hhanri/ghotel/api/api_error"
 	"github.com/hhanri/ghotel/api/middleware"
 	"github.com/hhanri/ghotel/db"
 )
 
 var config = fiber.Config{
-	ErrorHandler: func(c *fiber.Ctx, err error) error {
-		return c.JSON(
-			map[string]string{"error": err.Error()},
-		)
-	},
+	ErrorHandler: api_error.FiberErrorHandler,
 }
 
 func main() {
@@ -83,12 +80,4 @@ func main() {
 
 	app.Listen(*listenAddr)
 
-}
-
-func handleFoo(c *fiber.Ctx) error {
-	return c.JSON(
-		map[string]string{
-			"msg": "Working just fine",
-		},
-	)
 }
