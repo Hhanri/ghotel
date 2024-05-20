@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/hhanri/ghotel/api/api_error"
 	"github.com/hhanri/ghotel/db"
 	"github.com/hhanri/ghotel/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,7 +32,7 @@ type BookRoomParams struct {
 func (h *RoomHandler) HandleGetAllRooms(c *fiber.Ctx) error {
 	rooms, err := h.store.Room.GetRooms(c.Context(), struct{}{})
 	if err != nil {
-		return FiberInternalErrorResponse(c)
+		return api_error.FiberInternalErrorResponse(c)
 	}
 	return c.JSON(rooms)
 }
@@ -51,18 +52,18 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	roomId := c.Params("id")
 	user, err := GetAuth(c.Context())
 	if err != nil {
-		return FiberUnauthorizedErrorResponse(c)
+		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
 
 	var params BookRoomParams
 	if err := c.BodyParser(&params); err != nil {
-		return FiberBadRequestErrorResponse(c)
+		return api_error.FiberBadRequestErrorResponse(c)
 	}
 
 	if err := params.validate(); err != nil {
-		return FiberErrorResponse(
+		return api_error.FiberErrorResponse(
 			c,
-			ErrorResponse{
+			api_error.ErrorResponse{
 				Error:      err.Error(),
 				StatusCode: http.StatusBadRequest,
 			},
@@ -70,17 +71,17 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	}
 	exists, err := h.roomExists(c.Context(), roomId)
 	if err != nil || !exists {
-		return FiberBadRequestErrorResponse(c)
+		return api_error.FiberBadRequestErrorResponse(c)
 	}
 
 	ok, err := h.isRoomAvailable(c.Context(), roomId, params)
 	if err != nil {
-		return FiberInternalErrorResponse(c)
+		return api_error.FiberInternalErrorResponse(c)
 	}
 	if !ok {
-		return FiberErrorResponse(
+		return api_error.FiberErrorResponse(
 			c,
-			ErrorResponse{
+			api_error.ErrorResponse{
 				Error:      "Room already booked",
 				StatusCode: http.StatusNotAcceptable,
 			},
@@ -97,7 +98,7 @@ func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 
 	inserted, err := h.store.Booking.Insert(c.Context(), &booking)
 	if err != nil {
-		return FiberBadRequestErrorResponse(c)
+		return api_error.FiberBadRequestErrorResponse(c)
 	}
 
 	return c.JSON(inserted)

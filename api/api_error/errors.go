@@ -1,4 +1,4 @@
-package api
+package api_error
 
 import (
 	"net/http"
@@ -11,32 +11,32 @@ type ErrorResponse struct {
 	StatusCode int    `json:"statusCode"`
 }
 
-var internalErrorResponse = ErrorResponse{
+var InternalErrorResponse = ErrorResponse{
 	Error:      "Internal Server Error",
 	StatusCode: http.StatusInternalServerError,
 }
 
-var notFoundErrorResponse = ErrorResponse{
+var NotFoundErrorResponse = ErrorResponse{
 	Error:      "Not Found",
 	StatusCode: http.StatusNotFound,
 }
 
-var invalidCredentialsErrorResponse = ErrorResponse{
+var InvalidCredentialsErrorResponse = ErrorResponse{
 	Error:      "Invalid Credentials",
 	StatusCode: http.StatusUnauthorized,
 }
 
-var expiredTokenErrorResponse = ErrorResponse{
+var ExpiredTokenErrorResponse = ErrorResponse{
 	Error:      "Expired Token",
 	StatusCode: http.StatusUnauthorized,
 }
 
-var unauthorizedErrorResponse = ErrorResponse{
+var UnauthorizedErrorResponse = ErrorResponse{
 	Error:      "Unauthorized",
 	StatusCode: http.StatusUnauthorized,
 }
 
-var badRequestErrorResponse = ErrorResponse{
+var BadRequestErrorResponse = ErrorResponse{
 	Error:      "Bad Request",
 	StatusCode: http.StatusBadRequest,
 }
@@ -46,25 +46,25 @@ func FiberErrorResponse(c *fiber.Ctx, err ErrorResponse) error {
 }
 
 func FiberInternalErrorResponse(c *fiber.Ctx) error {
-	return FiberErrorResponse(c, internalErrorResponse)
+	return FiberErrorResponse(c, InternalErrorResponse)
 }
 
 func FiberNotFoundErrorResponse(c *fiber.Ctx) error {
-	return FiberErrorResponse(c, notFoundErrorResponse)
+	return FiberErrorResponse(c, NotFoundErrorResponse)
 }
 
 func FiberUnauthorizedErrorResponse(c *fiber.Ctx) error {
-	return FiberErrorResponse(c, unauthorizedErrorResponse)
+	return FiberErrorResponse(c, UnauthorizedErrorResponse)
 }
 
 func FiberInvalidCredentialsErrorResponse(c *fiber.Ctx) error {
-	return FiberErrorResponse(c, invalidCredentialsErrorResponse)
+	return FiberErrorResponse(c, InvalidCredentialsErrorResponse)
 }
 
 func FiberExpiredTokenErrorResponse(c *fiber.Ctx) error {
-	return FiberErrorResponse(c, expiredTokenErrorResponse)
+	return FiberErrorResponse(c, ExpiredTokenErrorResponse)
 }
 
 func FiberBadRequestErrorResponse(c *fiber.Ctx) error {
-	return FiberErrorResponse(c, badRequestErrorResponse)
+	return FiberErrorResponse(c, BadRequestErrorResponse)
 }
