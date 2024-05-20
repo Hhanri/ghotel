@@ -8,6 +8,7 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/hhanri/ghotel/api/api_error"
+	"github.com/hhanri/ghotel/api/api_util"
 	"github.com/hhanri/ghotel/db"
 	"github.com/hhanri/ghotel/types"
 	"go.mongodb.org/mongo-driver/bson"
@@ -50,7 +51,7 @@ func (p BookRoomParams) validate() error {
 
 func (h *RoomHandler) HandleBookRoom(c *fiber.Ctx) error {
 	roomId := c.Params("id")
-	user, err := GetAuth(c.Context())
+	user, err := api_util.GetAuth(c.Context())
 	if err != nil {
 		return api_error.FiberUnauthorizedErrorResponse(c)
 	}
