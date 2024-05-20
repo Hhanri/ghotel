@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
@@ -117,4 +118,12 @@ func main() {
 		time.Now().Add(time.Hour*24),
 	)
 
+	for i := range 100 {
+		fixtures.AddHotel(
+			store,
+			fmt.Sprintf("Hotel_%d", i),
+			"France",
+			i%5+1,
+		)
+	}
 }
